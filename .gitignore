@@ -1,0 +1,6 @@
+
+# Not uploading .DS_Store
+.DS_Store
+**.asv
+**.DS_STORE
+**.mat
