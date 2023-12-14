@@ -10,8 +10,8 @@ function [amp_all, nmrFit, nmrFit_ppm, dyn, detrend_sine, fitted_sine, detrend_p
 %       values are [2 10].
 %   save_fig_flag: logical input for saving figures. Figures are saved in the
 %       same folder as dyn_path.
-%   rbc_axis_lim: sets axis limits on rbc oscillation plots to +-rbc_axis_lim
-%       if zero, automatic limits are used
+%   rbc_axis_lim: Sets axis limits on rbc oscillation plots. If 0,
+%       automatic limits are used.
 %   Optional: 
 %   dynamicSummary(...,'oscType',method)
 %       available methods are:

@@ -1,6 +1,8 @@
 function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw_path)
 
-[~, ~, scanner] = fileparts(raw_path);
+[~, twix_filename, scanner] = fileparts(raw_path);
+
+gyro_ratio = 11.777; % gyromagnetic ratio of 129Xe in MHz/Tesla
 
 % Read in twix or P file and define associated variables
 if strcmp(scanner, '.dat')
@@ -32,11 +34,13 @@ if strcmp(scanner, '.dat')
         end
     elseif isfield(twix.hdr.Phoenix, 'sWipMemBlock')
         if isfield(twix.hdr.Phoenix.sWipMemBlock, 'alFree')
-            excitation = twix.hdr.Phoenix.sWipMemBlock.alFree{1, 5};
+            if contains(twix_filename, '2002')
+                excitation = twix.hdr.Phoenix.sWipMemBlock.alFree{1, 4};
+            else
+                excitation = twix.hdr.Phoenix.sWipMemBlock.alFree{1, 5};
+            end
         end
     end
-
-    gyro_ratio = 11.777; % gyromagnetic ratio of 129Xe in MHz/Tesla
 
     % RF excitation will be in ppm, either 218ppm or 208 ppm
     rf_excitation = round(excitation/(gyro_ratio * mag_fstregth));
@@ -56,89 +60,41 @@ elseif strcmp(scanner, '.7')
 
 elseif strcmp(scanner, '.h5')
     % mrd file
-    % Reading the k-space data
-    dataset_data = h5read(raw_path, '/dataset/data');
-    all_kspace_data = dataset_data.data;
 
-    %Reshaping the k-space
-    npts = size(all_kspace_data{1}, 1) / 2; % 512 for duke
-    nfids = size(all_kspace_data, 1); % 520 for duke
+    % read in mrd file dataset and ismrmrdHeader
+    dataset = ismrmrd.Dataset(raw_path, 'dataset');
+    ismrmrd_header = ismrmrd.xml.deserialize(dataset.readxml);
 
-    fids = [];
-    for ii = 1:nfids
-        fid = all_kspace_data{ii};
-        i = 1;
-        for j = 1:npts
-            fids(j, ii) = double(complex(fid(i), fid(i+1)));
-            i = i + 2;
-        end
-    end
-    % Reading dwell_time from a k-space fid
-    cali_data_head = dataset_data.head;
-    dwell_time_all = cali_data_head.sample_time_us;
-    dwell_time = double(dwell_time_all(1)) * 10^-6;
-
-    % Dataset header variables are in the xml field - gives string
-    dataset_header = h5read(raw_path, '/dataset/xml');
-
-    xml_struct = xml2struct(dataset_header); % the xml2struct converts the string
-    tr_mrd = str2double(xml_struct.ismrmrdHeader.sequenceParameters.TR.Text);
-
-    % Threshold to not scale by 1E-3 some tr_mrd are in seconds
-    if tr_mrd < 1E-1
-        tr = tr_mrd; % this is 0.015 for duke
-    else
-        tr = tr_mrd * 1E-3;
+    % convert user parameter fields to maps for easy query
+    general_user_params_long = containers.Map();
+    data_struct = ismrmrd_header.userParameters.userParameterLong;
+    for i = 1:numel(data_struct)
+        general_user_params_long(data_struct(i).name) = data_struct(i).value;
     end
 
-    site_name = xml_struct.ismrmrdHeader.acquisitionSystemInformation.systemVendor.Text;
+    % read in key variables
+    vendor = ismrmrd_header.acquisitionSystemInformation.systemVendor;
+    dwell_time = double(dataset.readAcquisition().head.sample_time_us(1)) * 1e-6; % in s
+    xeFreqMHz = general_user_params_long("xe_center_frequency") * 1e-6; % gas excitation frequency in MHz
+    tr = ismrmrd_header.sequenceParameters.TR(2) * 1e-3; % dissolved TR in s
+    field_strength = ismrmrd_header.acquisitionSystemInformation.systemFieldStrength_T; % in T
+    freq_dis_excitation_hz = general_user_params_long("xe_dissolved_offset_frequency"); % in Hz
 
-    % IOWA GE data
-    switch site_name
+    % calculate rf excitation in ppm
+    rf_excitation = round(freq_dis_excitation_hz/(gyro_ratio * field_strength));
 
-        case 'GE'
-
-            % conjugating the data solved the issues but we don't exactly know
-            % the reason
-
-            fids = conj(fids);
-            % remove the first two points due to initial recovery time
-            % and zero pad the end
-            fids = fids(3:end, :);
-            fids(size(fids, 1):size(fids, 1)+2, :) = 0;
-
-            fids = fids / max(abs(fids(:)), [], 'all'); % max Normalizing
-            xeFreqMHz_mrd = str2double(xml_struct.ismrmrdHeader.encoding.trajectoryDescription.userParameterDouble{1, 2}.value.Text);
-            xeFreqMHz = xeFreqMHz_mrd * 1E-6; % 34.0923 MHz for duke
-            mag_fstrength = str2double(xml_struct.ismrmrdHeader.acquisitionSystemInformation.systemFieldStrengthu_T.Text);
-            % see if the excitation is in the mrd file
-            try
-                excitation = str2double(xml_struct.ismrmrdHeader.encoding.trajectoryDescription.userParameterDouble{1, 3}.value.Text);
-                % RF excitation will be in ppm, either 218ppm or 208 ppm
-                rf_excitation = round(abs(excitation-xeFreqMHz*1E6)/(xeFreqMHz), 1);
-            catch
-                rf_excitation = 218;
-            end
-            % Philips - Cincinnati Children's Hospital Medical Center Data
-        case 'Philips'
-            xeFreqMHz = str2double(xml_struct.ismrmrdHeader.userParameters.userParameterLong.value.Text) * 1E-6;
-            mag_fstrength = xml_struct.ismrmrdHeader.acquisitionSystemInformation.systemFieldStrengthu_T.Text;
-            rf_excitation = str2double(xml_struct.ismrmrdHeader.userParameters.userParameterDouble.value.Text);
-
-        case 'SIEMENS'
-            xeFreqMHz_mrd = str2double(xml_struct.ismrmrdHeader.encoding.trajectoryDescription.userParameterDouble{1, 2}.value.Text);
-            xeFreqMHz = xeFreqMHz_mrd * 1E-6;
-            dwell_time = str2double(xml_struct.ismrmrdHeader.encoding.trajectoryDescription.userParameterDouble{1}.value.Text);
-            % see if the excitation is in the mrd file
-            try
-                excitation = str2double(xml_struct.ismrmrdHeader.encoding.trajectoryDescription.userParameterDouble{1, 3}.value.Text);
-                % RF excitation will be in ppm, either 218ppm or 208 ppm
-                rf_excitation = round(abs(excitation-xeFreqMHz*1E6)/(xeFreqMHz), 1);
-            catch
-                rf_excitation = 218;
-            end
-        otherwise
-            error('Not a valid site name')
+    % read k-space data
+    npts = size(dataset.readAcquisition(1).data{1},1);
+    nfids = dataset.getNumberOfAcquisitions;
+    fids_cell = dataset.readAcquisition().data;
+    fids = zeros(npts, nfids);
+    for i=1:nfids
+        fids(:,i) = transpose(double(fids_cell{i}(:,1)));
+    end
+    
+    % if data from GE scanner, take complex conjugate
+    if strcmpi(vendor,'ge')
+        fids = conj(fids);
     end
 
 else

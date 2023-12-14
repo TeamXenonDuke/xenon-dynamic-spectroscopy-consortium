@@ -1,3 +1,4 @@
+
 clc;
 clear;
 close all;
@@ -48,8 +49,8 @@ BHs = [2 7];
 %set figure saving flag
 save_figs = 1;
 
-%set axis limits on rbc oscillation plots. if zero, auto limits used
-rbc_axis_lim = 0; %limits are set as +-rbc_axis_lim (percent)
+%set axis limits on rbc oscillation plots. If zero, auto limits used
+rbc_axis_lim = 0; %Default is auto-scaling
 
 % Dynamic Summary after fitting Sine and Peaks
 [amp_all, nmrFit, nmrFit_ppm, dyn, detrend_sine, fitted_sine, detrend_peaks, fitted_peaks] = ...

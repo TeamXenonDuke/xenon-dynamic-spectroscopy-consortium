@@ -8,8 +8,8 @@ function plotOscillations(dyn, BHs, detrend, fitted, rbc_axis_lim, save_fig_flag
 %       values are [2 10].
 %   detrend: structure containing detrended oscillations
 %   fitted: structure containing fits to detrended oscillations
-%   rbc_axis_lim: sets axis limits on rbc oscillation plots to +-rbc_axis_lim
-%       if zero, automatic limits are used
+%   rbc_axis_lim: sets axis limits on rbc oscillation plots. If 0,
+%       auto-scaling is used. If non-zero, limits are +/- 10
 %   save_fig_flag: logical input for saving figures
 %   save_fig_path: path to save figures to
 
@@ -40,12 +40,12 @@ case 'sine'
     xlim([dyn.t(BHstart) dyn.t(BHend)])
     xlabel('Time (s)'), ylabel('Amplitude')
     set(gca,'FontSize',axFontFs)
-    if rbc_axis_lim~=0
-        if rbc_axis_lim>0
-            ylim([-rbc_axis_lim rbc_axis_lim])
-        else
-            ylim([rbc_axis_lim -rbc_axis_lim])
-        end
+    if rbc_axis_lim==0
+        axis 'auto y'
+    elseif rbc_axis_lim>0
+        ylim([-rbc_axis_lim rbc_axis_lim])
+    elseif rbc_axis_lim<0
+        ylim([rbc_axis_lim -rbc_axis_lim])
     end
 
     subplot(4,1,2), hold on
@@ -87,12 +87,12 @@ case 'peaks'
     plot(dyn.t(BHstart:BHend,1),fitted.area_max*100*ones(1,length(BHstart:BHend)),'--','Linewidth',.25,'Color',[0, 0.4470, 0.7410])
     plot(dyn.t(BHstart:BHend,1),fitted.area_min*100*ones(1,length(BHstart:BHend)),'--','Linewidth',.25,'Color',[0, 0.4470, 0.7410])
     xlim(BHs), ylabel('Amplitude (%)')
-    if rbc_axis_lim~=0
-        if rbc_axis_lim>0
-            ylim([-rbc_axis_lim rbc_axis_lim])
-        else
-            ylim([rbc_axis_lim -rbc_axis_lim])
-        end
+    if rbc_axis_lim==0
+        axis 'auto y'
+    elseif rbc_axis_lim>0
+        ylim([-rbc_axis_lim rbc_axis_lim])
+    elseif rbc_axis_lim<0
+        ylim([rbc_axis_lim -rbc_axis_lim])
     end
     
     subplot(4,1,2), hold on
