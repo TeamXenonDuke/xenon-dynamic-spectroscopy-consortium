@@ -1,6 +1,8 @@
 # Spectroscopy_Processing_Production
 
-This MATLAB repository will process our calibration scan and produce a pptx file. User should dowonload/clone this repository and open 'spectroscopy_processing.m' file on MATLAB (MATLAB Current Folder must contain the "spectroscopy_process_functions" folder). And then
+This MATLAB repository will process our calibration scan and produce a pptx file. User should dowonload/clone this repository and open 'spectroscopy_processing.m' file on MATLAB (MATLAB Current Folder must contain the "spectroscopy_process_functions" folder). In order to read MRD files you will need to download/clone the ismrmrd repository and add it to your MATLAB path: https://github.com/ismrmrd/ismrmrd
+
+To process a subject:
 
 1. Run the 'spectroscopy_processing.m' script.
 2. User will be asked to select the calibration twix (.dat) file. Select the file. 

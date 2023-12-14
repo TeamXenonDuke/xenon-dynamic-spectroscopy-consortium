@@ -11,7 +11,7 @@ disFrames = 500;
 
 [raw_folder, ~, ~] = fileparts(raw_path);
 % Read in twix or P file and define associated variables
-[raw_fids, dwell_time, npts, tr, xeFreqMHz] = readRawDyn(raw_path);
+[raw_fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw_path);
 % For high flip, also comment out SIFT
 % raw_fids = raw_fids(10:end,5:end);
 
@@ -49,11 +49,15 @@ switch peaks
         % find the gas peak
         [pk_gas, loc_gas, ~] = findpeaks(avgdata_fft(freq_ppm < -175), ...
             'SortStr', 'descend', 'NPeaks', 1);
+
+        % Flag of Using Junlan's guessing
+        Using_Junlan_guessing = false;
+
         % checks if there are 2 dissolved peaks that are approximately
         % spaced apart. Otherwise, use hardcoded guess
-        if length(pks_dis) == 2 && (abs(freq_ppm_dis(locs_dis(2)) ...
+        if Using_Junlan_guessing && (length(pks_dis) == 2 && (abs(freq_ppm_dis(locs_dis(2)) ...
                 -freq_ppm_dis(locs_dis(1))) < 25 && abs(freq_ppm_dis(locs_dis(2)) ...
-                -freq_ppm_dis(locs_dis(1))) > 15)
+                -freq_ppm_dis(locs_dis(1))) > 15))
             pk_membrane = pks_dis(1);
             % Set the barrier freq
             membrane_freq = freq_ppm_dis(locs_dis(1)); % in ppm
@@ -64,19 +68,14 @@ switch peaks
             % Set the rbc freq
             gas_freq = freq_ppm_gas(loc_gas); % in ppm
         else
-            % hard coded initial frequency and area guess
-            if contains(raw_path, '208ppm')
-                rbc_freq = 11.3;
-                membrane_freq = -11.3;
-                gas_freq = -208.4;
-            else
-                rbc_freq = 0;
-                membrane_freq = -21.7;
-                gas_freq = -218;
-            end
-            pk_rbc = 1;
-            pk_membrane = 1;
-            pk_gas = 1;
+            % Calculate the initial guess based on the read-in ppm 
+            % Using Bas equation
+            rbc_freq = 217.2-rf_excitation;
+            membrane_freq = 197.7-rf_excitation;
+            gas_freq = 0-rf_excitation;
+  
+            pk_rbc = 1; pk_membrane = 1; pk_gas=1;
+         
         end
         % Three peak fit initial guesses
         % Set starting guess of frequency.
