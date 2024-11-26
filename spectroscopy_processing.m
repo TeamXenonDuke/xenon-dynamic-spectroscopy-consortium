@@ -14,7 +14,7 @@ disp("Select Calibration Twix File (.dat) or ismrmd file (.h5) ...");
 
 [file, path] = uigetfile('*.*', 'Select file');
 file_with_path = fullfile(path, file);
-output_dir = fullfile(path, 'Spectroscopy');
+output_dir = fullfile(path, 'spectroscopy');
 % Create the Spectroscopy folder
 if ~exist(output_dir, 'dir')
     mkdir(output_dir);
@@ -22,7 +22,7 @@ end
 % Fit dynamic spectra -- this should create dynV.mat file
 dyn = fitDynamicSpec(file_with_path, 'dynV');
 % Get the mat file path
-dyn_filepath = fullfile(path, 'Spectroscopy', 'dynV.mat');
+dyn_filepath = fullfile(path, 'spectroscopy', 'dynV.mat');
 % Get the subject ID from folder containing twix file
 if contains(path, '\') % windows path
     path_cell = strsplit(path, '\');
