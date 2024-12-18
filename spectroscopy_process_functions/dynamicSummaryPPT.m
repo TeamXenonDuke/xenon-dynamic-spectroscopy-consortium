@@ -38,23 +38,31 @@ for slideNum = 1:length(imgName)
     % Add a summary slide
     summarySlide = add(slides, 'SpectralSummary');
 
+    % Edit text boxes to fit the word "Membrane" without needing two lines
+    barrierTextBox = find(summarySlide,'Barrier');
+    barrier2TextBox = find(summarySlide,'Barrier2');
+    rbc2TextBox = find(summarySlide,'RBC2');
+    set(barrierTextBox,'Width','1.4in','X','10.5in');
+    set(barrier2TextBox,'FontSize','11pt','VAlign','middle','Y','1.15in');
+    set(rbc2TextBox,'FontSize','11pt','VAlign','middle','Y','1.15in');
+
     % Add all text elements
     replace(summarySlide, 'Dyn Text', 'Dynamics by Resonance');
     replace(summarySlide, 'RBC', 'RBC');
-    replace(summarySlide, 'Barrier', 'Barrier');
+    replace(summarySlide, 'Barrier', 'Membrane');
     replace(summarySlide, 'Gas', 'Gas');
     replace(summarySlide, 'Osc Text', 'Detrended RBC Oscillations');
-    replace(summarySlide, 'Amp Text', 'RBC Oscillation Amplitude*');
+    replace(summarySlide, 'Amp Text', 'RBC Oscillation Analysis');
     replace(summarySlide, 'Pkpk Text', '*Peak-to-Peak');
     replace(summarySlide, 'Static Text', 'Static Spectroscopy');
-    replace(summarySlide, 'StaticValues Text', 'Static Spectroscopy (Barrier Voigt)');
+    replace(summarySlide, 'StaticValues Text', 'Static Spectroscopy');
     replace(summarySlide, 'dynSNR Text', 'Dynamic SNR');
-    replace(summarySlide, 'norm Text', '*normalized to barrier peak');
+    replace(summarySlide, 'norm Text', '*normalized to membrane peak');
     replace(summarySlide, 'box1', ' ');
     replace(summarySlide, 'box2', ' ');
     replace(summarySlide, 'box3', ' ');
     replace(summarySlide, 'RBC2', 'RBC');
-    replace(summarySlide, 'Barrier2', 'Barrier');
+    replace(summarySlide, 'Barrier2', 'Membrane');
     replace(summarySlide, 'scanDate Text', 'Scan Date:');
     replace(summarySlide, 'processingDate Text', 'Dynamic Fit Date:');
     replace(summarySlide, 'ampDate Text', 'RBC Fit Date:');
@@ -216,7 +224,7 @@ for slideNum = 1:length(imgName)
     staticTable.ColSpecs(5).FontColor = '#767171';
 
     staticTable.row(1).Style = {VAlign('bottom')};
-    staticTable.row(1).FontSize = '12pt';
+    staticTable.row(1).FontSize = '11pt';
     staticTable.row(7).Style = {VAlign('Top')};
 
     staticTable.StyleName = 'No Style, No Grid';
