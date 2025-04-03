@@ -52,17 +52,15 @@ save_figs = 1;
 %set axis limits on rbc oscillation plots. If zero, auto limits used
 rbc_axis_lim = 0; %Default is auto-scaling
 
-% Dynamic Summary after fitting Sine and Peaks
-[amp_all, nmrFit, nmrFit_ppm, dyn, detrend_sine, fitted_sine, detrend_peaks, fitted_peaks] = ...
+% Dynamic Summary after fitting Peaks
+[amp_all, nmrFit, nmrFit_ppm, dyn, detrend_peaks, fitted_peaks] = ...
     dynamicSummary(file_with_path, dyn_filepath, BHs, save_figs, rbc_axis_lim);
 dates = getDynDatesforPPT(file_with_path, dyn_filepath); % gives scan date, dynamic fit date, etc.
 
-% Sine and Peaks fitting respectively, the figures will be fetechted
-% accordingly
-imgName{1} = 'sine';
-imgName{2} = 'peaks';
+% Used for fetching peak figures
+imgName = 'peaks';
 
-%% Creating the pptx, should have two slides with sine and peaks fitted data
+%% Creating the pptx, should have title slide and peaks fitted data
 dynamicSummaryPPT(subject_id, output_dir, imgName, dates, amp_all, nmrFit_ppm, rf_excitation);
 dynamicSummaryCSV(subject_id, output_dir, dates, amp_all, nmrFit_ppm, rf_excitation);
 % Changing to the home directory
