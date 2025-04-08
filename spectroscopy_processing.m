@@ -9,6 +9,20 @@ close all;
 project_dir = fullfile(filepath, 'spectroscopy_process_functions');
 addpath(project_dir); % add the functions to the matlab path. Ok if already there.
 
+% Setting the number of dropping points droppt_N.
+global droppt_N;
+droppt_N = 1; % Input the number of points you want to drop;
+
+if droppt_N > 0
+    choice = questdlg(sprintf('You are dropping %d points. Are you sure?', droppt_N), ...
+        'Drop Confirmation', 'Yes', 'No', 'No');
+
+    if strcmp(choice, 'No')
+        droppt_N = 0; % cancel dropping
+        warning('Drop canceled. No points will be removed.');
+    end
+end
+
 % Prompt user to select file for processing from current starting directory
 disp("Select Calibration Twix File (.dat) or ismrmd file (.h5) ...");
 
