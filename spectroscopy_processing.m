@@ -11,7 +11,7 @@ addpath(project_dir); % add the functions to the matlab path. Ok if already ther
 
 % Setting the number of dropping points droppt_N.
 global droppt_N;
-droppt_N = 1; % Input the number of points you want to drop;
+droppt_N = []; % Input the number of points you want to drop;
 
 % Prompt user to select file for processing from current starting directory
 disp("Select Calibration Twix File (.dat) or ismrmd file (.h5) ...");
