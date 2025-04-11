@@ -13,16 +13,6 @@ addpath(project_dir); % add the functions to the matlab path. Ok if already ther
 global droppt_N;
 droppt_N = 1; % Input the number of points you want to drop;
 
-if droppt_N > 0
-    choice = questdlg(sprintf('You are dropping %d points. Are you sure?', droppt_N), ...
-        'Drop Confirmation', 'Yes', 'No', 'No');
-
-    if strcmp(choice, 'No')
-        droppt_N = 0; % cancel dropping
-        warning('Drop canceled. No points will be removed.');
-    end
-end
-
 % Prompt user to select file for processing from current starting directory
 disp("Select Calibration Twix File (.dat) or ismrmd file (.h5) ...");
 
@@ -70,6 +60,10 @@ rbc_axis_lim = 0; %Default is auto-scaling
 [amp_all, nmrFit, nmrFit_ppm, dyn, detrend_peaks, fitted_peaks] = ...
     dynamicSummary(file_with_path, dyn_filepath, BHs, save_figs, rbc_axis_lim);
 dates = getDynDatesforPPT(file_with_path, dyn_filepath); % gives scan date, dynamic fit date, etc.
+
+if droppt_N > 0
+    warning('You are dropping the first %d fitting points!!', droppt_N')
+end
 
 % Used for fetching peak figures
 imgName = 'peaks';
