@@ -50,7 +50,7 @@ function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw
     
         % RF excitation will be in ppm, either 218ppm or 208 ppm
         rf_excitation = round(excitation/(gyro_ratio * mag_fstregth));
-    
+
     elseif strcmp(scanner, '.7')
         % Pfile from GE
         pfile = GE.Pfile.read(raw_path);
@@ -63,7 +63,7 @@ function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw
         tr = pfile.image.tr * 1E-6;
         fids = pfile.data;
         xeFreqMHz = 17.660445;
-    
+
     elseif strcmp(scanner, '.h5')
         % mrd file
     
@@ -97,7 +97,7 @@ function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw
         for i=1:nfids
             fids(:,i) = transpose(double(fids_cell{i}(:,1)));
         end
-    
+
     else
         error('Unknown Raw File Type')
     end
@@ -107,7 +107,7 @@ function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw
         fids(size(fids, 1):size(fids, 1) + droppt_N, :) = 0;
     end
     % if data from GE scanner, take complex conjugate
-    if strcmpi(vendor,'ge')
+    if strcmp(scanner, '.h5') && strcmpi(vendor,'ge')
         fids = conj(fids);
     end
 end
