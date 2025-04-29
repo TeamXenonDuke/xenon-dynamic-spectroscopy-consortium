@@ -9,6 +9,10 @@ close all;
 project_dir = fullfile(filepath, 'spectroscopy_process_functions');
 addpath(project_dir); % add the functions to the matlab path. Ok if already there.
 
+% Setting the number of dropping points droppt_N.
+global droppt_N;
+droppt_N = []; % Input the number of points you want to drop;
+
 % Prompt user to select file for processing from current starting directory
 disp("Select Calibration Twix File (.dat) or ismrmd file (.h5) ...");
 
@@ -56,6 +60,10 @@ rbc_axis_lim = 0; %Default is auto-scaling
 [amp_all, nmrFit, nmrFit_ppm, dyn, detrend_peaks, fitted_peaks] = ...
     dynamicSummary(file_with_path, dyn_filepath, BHs, save_figs, rbc_axis_lim);
 dates = getDynDatesforPPT(file_with_path, dyn_filepath); % gives scan date, dynamic fit date, etc.
+
+if droppt_N > 0
+    warning('You are dropping the first %d fitting points!!', droppt_N')
+end
 
 % Used for fetching peak figures
 imgName = 'peaks';
