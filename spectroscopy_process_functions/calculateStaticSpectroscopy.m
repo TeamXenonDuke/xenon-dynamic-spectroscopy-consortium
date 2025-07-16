@@ -1,12 +1,12 @@
-function [nmrFit, nmrFit_ppm, fids, tr] = calculateStaticSpectroscopy(raw_path, BHs, model)
+function [nmrFit, nmrFit_ppm, fids, tr] = calculateStaticSpectroscopy(raw_path, BHs, hr, model)
 
 [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw_path);
-nFrames = size(fids,2);             % Number of Dis. Frames
+nFrames = size(fids,2); % Consortium standard: 500 dis., 20 gas (520 total)
 t_tr = tr*(1:nFrames);
-nAvg = ceil(1/tr);
+nAvg = ceil(60/hr/tr);
 [BHstart, ~] = findBHs(t_tr, BHs);
 
-% Calculate Static Spectral Parameters
+%% Calculate Static Spectral Parameters
 t = dwell_time*(0:(npts-1))';
 % Analyze only a fraction of the total data
 avgdata = mean(fids(:,BHstart:BHstart+nAvg),2); % average 1s of data
