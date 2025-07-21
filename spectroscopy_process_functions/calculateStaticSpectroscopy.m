@@ -1,15 +1,18 @@
 function [nmrFit, nmrFit_ppm, fids, tr] = calculateStaticSpectroscopy(raw_path, BHs, model)
 
 [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw_path);
-nFrames = size(fids,2);             % Number of Dis. Frames
-t_tr = tr*(1:nFrames);
+nFrames = size(fids,2);             % Number of frames
+nDis = 500;                         % Number of dissolved frames
+disData = fids(:,1:nDis);           % Dissolved data
+gasData = fids(:,nDis+1:end);       % Gas data
+t_tr = tr*(1:nFrames);              % Time vector in increments of TR
 nAvg = ceil(1/tr);
 [BHstart, ~] = findBHs(t_tr, BHs);
 
 % Calculate Static Spectral Parameters
 t = dwell_time*(0:(npts-1))';
 % Analyze only a fraction of the total data
-avgdata = mean(fids(:,BHstart:BHstart+nAvg),2); % average 1s of data
+avgdata = mean(disData(:,BHstart:BHstart+nAvg),2); % average 1s of data
 % perform findpeaks to guide initial area and frequency guess. 
 % finds 3 peaks (barrier, RBC, gas) in descending order
 avgdata_fft = abs(fftshift(fft(avgdata)));
