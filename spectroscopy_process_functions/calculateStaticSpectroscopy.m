@@ -2,9 +2,9 @@ function [nmrFit, gasFit, nmrFit_ppm, fids, tr] = calculateStaticSpectroscopy(ra
 
 [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw_path);
 nFrames = size(fids,2);             % Number of frames
-nDis = 500;                         % Number of dissolved frames
-disData = fids(:,1:nDis);           % Dissolved data
-gasData = fids(:,nDis+1:end);       % Gas data
+nGas = 20;                         % Number of gas frames
+disData = fids(:,1:end-nGas);           % Dissolved data
+gasData = fids(:,end-nGas+1:end);       % Gas data
 t_tr = tr*(1:nFrames);              % Time vector in increments of TR
 nAvg = ceil(1/tr);
 [BHstart, ~] = findBHs(t_tr, BHs);
