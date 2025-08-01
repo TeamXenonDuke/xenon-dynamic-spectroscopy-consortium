@@ -7,7 +7,7 @@ function dyn = fitDynamicSpec(raw_path, dyn_save_name)
 peaks = 3;
 nToAvg = 5; % 1 for high flip
 skipSize = 1;
-disFrames = 500;
+gasFrames = 20;
 
 [raw_folder, ~, ~] = fileparts(raw_path);
 % Read in twix or P file and define associated variables
@@ -16,6 +16,7 @@ disFrames = 500;
 % raw_fids = raw_fids(10:end,5:end);
 
 % SIFT raw fids
+disFrames = size(raw_fids,2) - gasFrames;
 raw_fids = raw_fids(:, 2:disFrames);
 raw_fids = SIFT(raw_fids, dwell_time, tr);
 % raw_fids(:,901:end-1) = []; % shorten long aquisitions

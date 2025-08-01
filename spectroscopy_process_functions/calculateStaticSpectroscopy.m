@@ -1,15 +1,18 @@
-function [nmrFit, nmrFit_ppm, fids, tr] = calculateStaticSpectroscopy(raw_path, BHs, model)
+function [nmrFit, gasFit, nmrFit_ppm, fids, tr] = calculateStaticSpectroscopy(raw_path, BHs, model)
 
 [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw_path);
-nFrames = size(fids,2);             % Number of Dis. Frames
-t_tr = tr*(1:nFrames);
+nFrames = size(fids,2);             % Number of frames
+nGas = 20;                         % Number of gas frames
+disData = fids(:,1:end-nGas);           % Dissolved data
+gasData = fids(:,end-nGas+1:end);       % Gas data
+t_tr = tr*(1:nFrames);              % Time vector in increments of TR
 nAvg = ceil(1/tr);
 [BHstart, ~] = findBHs(t_tr, BHs);
 
-% Calculate Static Spectral Parameters
+%% Calculate Static Spectral Parameters
 t = dwell_time*(0:(npts-1))';
 % Analyze only a fraction of the total data
-avgdata = mean(fids(:,BHstart:BHstart+nAvg),2); % average 1s of data
+avgdata = mean(disData(:,BHstart:BHstart+nAvg),2); % average 1s of data
 % perform findpeaks to guide initial area and frequency guess. 
 % finds 3 peaks (barrier, RBC, gas) in descending order
 avgdata_fft = abs(fftshift(fft(avgdata)));
@@ -68,6 +71,10 @@ switch model
 end 
 nmrFit = nmrFit.fitTimeDomainSignal();
 
+%% Perform gas phase analysis
+gasFit = NMR_TimeFit(gasData(:,1), t, 1e-4, -84, 30, 0, 0, 10000);
+gasFit.fitTimeDomainSignal();
+
 %% Calculate Peak SNRs
 % historical "tail of fit residuals" SNR method
 timeFit=nmrFit.calcTimeDomainSignal(nmrFit.t);  % calculate fitted data in time domain
@@ -76,7 +83,7 @@ n25pct = round(length(timeRes)/4);
 std25 = std(timeRes(end-n25pct:end)); % take standard deviation of tail of residuals
 SNRresid = nmrFit.area/std25; % will contain a value for each peak (RBC, bar, gas)
 
-% Doreen's "simulated noise frame (snf)" SNR method:
+%% Doreen's "simulated noise frame (snf)" SNR method:
 BH_fids = fids(:,BHstart:BHstart+nAvg);
 fid_tail = length(BH_fids)/2; % focus calculation 2nd half of fids
 cropped_fids = BH_fids(fid_tail+1:end,:); 
@@ -88,13 +95,16 @@ SNR_frames = nmrFit.area'./noiseDis; % SNR of each frame
 SNRsnf = mean(SNR_frames,2)*sqrt(nAvg); % simulated noise frame SNR
 
 %% Change units from Hz to PPM
-ref_freq = nmrFit.freq(ngas);
+ref_freq_inc = nmrFit.freq(ngas); % incidental gas signal from dis. excitation
+ref_freq_ded = gasFit.freq; % dedicated gas signal from gas excitation
 
 positive_phase = nmrFit.phase - nmrFit.phase(2);
 positive_phase(positive_phase < 0) = positive_phase(positive_phase < 0) + 360;
 
 nmrFit_ppm.area = nmrFit.area/sum(nmrFit.area(nbar));
-nmrFit_ppm.freq = (nmrFit.freq-ref_freq)/xeFreqMHz;
+nmrFit_ppm.freq_inc = (nmrFit.freq-ref_freq_inc)/xeFreqMHz;
+nmrFit_ppm.freq_ded = ...
+    (nmrFit.freq - (ref_freq_ded - rf_excitation * xeFreqMHz)) / xeFreqMHz;
 nmrFit_ppm.fwhm = nmrFit.fwhm/xeFreqMHz;
 switch model
 case 'V'
@@ -111,7 +121,7 @@ case 'V'
     disp('    Area     Freq      FWHM      FWHMg     Phase     SNRresid   SNRsnf');
     for k = 1:peaks
         disp([sprintf('%8.2f', nmrFit.area(k)/sum(nmrFit.area(nbar))), ' ' ...
-            sprintf('%8.1f',(nmrFit.freq(k)-ref_freq)/xeFreqMHz),  '  ' ...
+            sprintf('%8.1f',(nmrFit.freq(k)-ref_freq_inc)/xeFreqMHz),  '  ' ...
             sprintf('%8.1f',nmrFit.fwhm(k)/xeFreqMHz), '  ' ...
             sprintf('%8.1f',nmrFit.fwhmG(k)/xeFreqMHz), '  ' ...
             sprintf('%9.1f',positive_phase(k)), '  '...
@@ -124,7 +134,7 @@ case 'L'
     nmrFit.phase(nmrFit.phase < 0) = nmrFit.phase(nmrFit.phase < 0)+360;
     for k = 1:peaks
         disp([sprintf('%8.2f', nmrFit.area(k)/sum(nmrFit.area(nbar))), ' ' ...
-            sprintf('%8.1f',(nmrFit.freq(k)-ref_freq)/xeFreqMHz),  '  ' ...
+            sprintf('%8.1f',(nmrFit.freq(k)-ref_freq_inc)/xeFreqMHz),  '  ' ...
             sprintf('%8.1f',nmrFit.fwhm(k)/xeFreqMHz), '  ' ...
             sprintf('%9.1f',positive_phase(k)), '  '...
             sprintf('%9.1f',SNRresid(k)) '  '...

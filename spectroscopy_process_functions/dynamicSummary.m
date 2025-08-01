@@ -88,7 +88,7 @@ amp_all.peaks = amp_peaks;
 %     sprintf('%7.1f',amp.snr)]);
 
 %% Calculate Oscillations Amplitudes and Static Parameters
-[nmrFit, nmrFit_ppm, ~] = calculateStaticSpectroscopy(raw_path, BHs, fitType);
+[nmrFit, ~, nmrFit_ppm, ~] = calculateStaticSpectroscopy(raw_path, BHs, fitType);
 
 %% Plots
 
