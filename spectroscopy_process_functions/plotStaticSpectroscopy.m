@@ -100,6 +100,5 @@ linkaxes([ax2,ax4 ax5],'x');
 xlim([150 250])
 
 if save_fig_flag == 1
-    save_fig_path = [save_fig_path];
     exportgraphics(gcf, save_fig_path);
 end
