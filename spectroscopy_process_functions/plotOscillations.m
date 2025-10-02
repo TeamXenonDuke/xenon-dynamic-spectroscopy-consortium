@@ -127,6 +127,5 @@ case 'peaks'
 end 
 
 if save_fig_flag == 1
-    options.Format = 'tiff';
-    hgexport(gcf,save_fig_path,options)
-end  
+    exportgraphics(gcf, save_fig_path);
+end

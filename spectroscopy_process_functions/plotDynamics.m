@@ -126,6 +126,5 @@ linkaxes(axHandles,'x');
 xlim([0 dyn.t(end)])
 
 if save_fig_flag == 1
-    options.Format = 'tiff';
-    hgexport(gcf,save_fig_path,options)   
+    exportgraphics(gcf, save_fig_path);
 end

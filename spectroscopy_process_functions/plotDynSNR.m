@@ -17,6 +17,5 @@ xlim([dyn.t(1), dyn.t(end)])
 xlabel('Time (s)'), ylabel('SNR')
 
 if save_fig_flag == 1
-    options.Format = 'tiff';
-    hgexport(gcf,save_fig_path,options)   
+    exportgraphics(gcf, save_fig_path);
 end
