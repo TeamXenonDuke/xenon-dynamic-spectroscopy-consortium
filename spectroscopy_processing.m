@@ -79,3 +79,8 @@ dynamicSummaryCSV(subject_id, output_dir, dates, amp_all, nmrFit_ppm, rf_excitat
 % Turn default figure visibility back on
 set(groot, 'defaultFigureVisible', 'on');
 close all;
+
+%% write rbc:m to csv
+% Need to have matlab directory open to subjects folder
+% outputfile = 'tmp_rbc_m.xlsx';
+% writecell({path(end-4:end),nmrFit_ppm.area(1),amp_all.peaks.area*100,amp_all.peaks.hr},outputfile,'WriteMode','append')
