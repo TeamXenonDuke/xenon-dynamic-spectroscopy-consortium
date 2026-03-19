@@ -64,7 +64,7 @@ function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw
         fids = pfile.data;
         xeFreqMHz = 17.660445;
 
-    elseif strcmp(scanner, '.h5')
+    elseif strcmpi(scanner, '.h5') || strcmpi(scanner, '.mrd')
         % mrd file
     
         % read in mrd file dataset and ismrmrdHeader
