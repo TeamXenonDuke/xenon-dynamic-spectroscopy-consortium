@@ -25,7 +25,7 @@ elseif strcmp(scanner,'.7')
         mm = scanDate(5:6);
         dd = scanDate(7:8);
     end
-elseif strcmp(scanner,'.h5')
+elseif strcmpi(scanner,'.h5') || strcmpi(scanner,'.mrd')
     % Dataset header variables are in the xml field - gives string 
     dataset_header = h5read(raw_path, '/dataset/xml');
     xml_struct = xml2struct(dataset_header); % the xml2struct converts the string
@@ -37,6 +37,6 @@ elseif strcmp(scanner,'.h5')
     end
 
     yyyy = scanDate(1:4);
-    mm = scanDate(5:6);
-    dd = scanDate(7:8);
+    mm = scanDate(6:7);
+    dd = scanDate(9:10);
 end 

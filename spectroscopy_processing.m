@@ -14,7 +14,7 @@ global droppt_N;
 droppt_N = []; % Input the number of points you want to drop;
 
 % Prompt user to select file for processing from current starting directory
-disp("Select Calibration Twix File (.dat) or ismrmd file (.h5) ...");
+disp("Select Calibration Twix File (.dat) or ismrmd file (.h5/.mrd) ...");
 
 [file, path] = uigetfile('*.*', 'Select file');
 file_with_path = fullfile(path, file);
