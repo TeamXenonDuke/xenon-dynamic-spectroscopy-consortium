@@ -1,6 +1,6 @@
 function [nmrFit, gasFit, nmrFit_ppm, fids, tr] = calculateStaticSpectroscopy(raw_path, BHs, model)
 
-[fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw_path);
+[fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation_hz, rf_excitation_ppm] = readRawDyn(raw_path);
 nFrames = size(fids,2);             % Number of frames
 nGas = 20;                         % Number of gas frames
 disData = fids(:,1:end-nGas);           % Dissolved data
@@ -46,9 +46,9 @@ if Using_Junlan_guessing && (length(pks_dis) == 2 && (abs(freq_ppm_dis(locs_dis(
 else
     % Calculate the initial guess based on the read-in ppm 
     % Using Bas equation
-    rbc_freq = 217.2-rf_excitation;
-    membrane_freq = 197.7-rf_excitation;
-    gas_freq = 0-rf_excitation;
+    rbc_freq = 217.2-rf_excitation_ppm;
+    membrane_freq = 197.7-rf_excitation_ppm;
+    gas_freq = 0-rf_excitation_ppm;
 
     pk_rbc = 1; pk_membrane = 1; pk_gas=1;
 end
@@ -94,22 +94,24 @@ noiseDis = std(real(diff));
 SNR_frames = nmrFit.area'./noiseDis; % SNR of each frame
 SNRsnf = mean(SNR_frames,2)*sqrt(nAvg); % simulated noise frame SNR
 
-%% Change units from Hz to PPM
+%% Calculate incidental and dedicated shifts
 ref_freq_inc = nmrFit.freq(ngas); % incidental gas signal from dis. excitation
 ref_freq_ded = gasFit.freq; % dedicated gas signal from gas excitation
-
-positive_phase = nmrFit.phase - nmrFit.phase(2);
-positive_phase(positive_phase < 0) = positive_phase(positive_phase < 0) + 360;
 
 nmrFit_ppm.area = nmrFit.area/sum(nmrFit.area(nbar));
 nmrFit_ppm.freq_inc = (nmrFit.freq-ref_freq_inc)/xeFreqMHz;
 nmrFit_ppm.freq_ded = ...
-    (nmrFit.freq - (ref_freq_ded - rf_excitation * xeFreqMHz)) / xeFreqMHz;
+    (nmrFit.freq - (ref_freq_ded - rf_excitation_hz)) / xeFreqMHz;
 nmrFit_ppm.fwhm = nmrFit.fwhm/xeFreqMHz;
 switch model
 case 'V'
     nmrFit_ppm.fwhmG = nmrFit.fwhmG/xeFreqMHz;
 end 
+
+%% Calculate phase
+positive_phase = nmrFit.phase - nmrFit.phase(2);
+positive_phase(positive_phase < 0) = positive_phase(positive_phase < 0) + 360;
+
 nmrFit_ppm.phase = positive_phase;
 nmrFit_ppm.SNRresid = SNRresid;
 nmrFit_ppm.SNRsnf = SNRsnf;

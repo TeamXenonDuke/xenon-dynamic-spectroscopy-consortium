@@ -1,4 +1,4 @@
-function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw_path)
+function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation_hz, rf_excitation_ppm] = readRawDyn(raw_path)
     
     global droppt_N;
     
@@ -49,7 +49,8 @@ function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw
         end
     
         % RF excitation will be in ppm, either 218ppm or 208 ppm
-        rf_excitation = round(excitation/(gyro_ratio * mag_fstregth));
+        rf_excitation_hz = excitation;
+        rf_excitation_ppm = round(excitation/(gyro_ratio * mag_fstregth));
 
     elseif strcmp(scanner, '.7')
         % Pfile from GE
@@ -87,7 +88,7 @@ function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw
         freq_dis_excitation_hz = general_user_params_long("xe_dissolved_offset_frequency"); % in Hz
     
         % calculate rf excitation in ppm
-        rf_excitation = round(freq_dis_excitation_hz/(gyro_ratio * field_strength));
+        rf_excitation_ppm = round(freq_dis_excitation_hz/(gyro_ratio * field_strength));
     
         % read k-space data
         npts = size(dataset.readAcquisition(1).data{1},1);
