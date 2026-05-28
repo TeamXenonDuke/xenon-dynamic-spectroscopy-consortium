@@ -88,6 +88,7 @@ function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation_hz, rf_excitation
         freq_dis_excitation_hz = general_user_params_long("xe_dissolved_offset_frequency"); % in Hz
     
         % calculate rf excitation in ppm
+        rf_excitation_hz = freq_dis_excitation_hz;
         rf_excitation_ppm = round(freq_dis_excitation_hz/(gyro_ratio * field_strength));
     
         % read k-space data
