@@ -11,7 +11,7 @@ gasFrames = 20;
 
 [raw_folder, ~, ~] = fileparts(raw_path);
 % Read in twix or P file and define associated variables
-[raw_fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(raw_path);
+[raw_fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation_hz, rf_excitation_ppm] = readRawDyn(raw_path);
 % For high flip, also comment out SIFT
 % raw_fids = raw_fids(10:end,5:end);
 
@@ -71,9 +71,9 @@ switch peaks
         else
             % Calculate the initial guess based on the read-in ppm 
             % Using Bas equation
-            rbc_freq = 217.2-rf_excitation;
-            membrane_freq = 197.7-rf_excitation;
-            gas_freq = 0-rf_excitation;
+            rbc_freq = 217.2-rf_excitation_ppm;
+            membrane_freq = 197.7-rf_excitation_ppm;
+            gas_freq = 0-rf_excitation_ppm;
   
             pk_rbc = 1; pk_membrane = 1; pk_gas=1;
          
