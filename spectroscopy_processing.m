@@ -39,7 +39,7 @@ else
 end
 
 %% Need RF Excitation to update on the report
-[fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation] = readRawDyn(file_with_path);
+[fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation_hz, rf_excitation_ppm] = readRawDyn(file_with_path);
 
 %% Preparing the ppt summary
 
@@ -69,8 +69,8 @@ end
 imgName = 'peaks';
 
 %% Creating the pptx, should have title slide and peaks fitted data
-dynamicSummaryPPT(subject_id, output_dir, imgName, dates, amp_all, nmrFit_ppm, rf_excitation);
-dynamicSummaryCSV(subject_id, output_dir, dates, amp_all, nmrFit_ppm, rf_excitation);
+dynamicSummaryPPT(subject_id, output_dir, imgName, dates, amp_all, nmrFit_ppm, rf_excitation_ppm);
+dynamicSummaryCSV(subject_id, output_dir, dates, amp_all, nmrFit_ppm, rf_excitation_ppm);
 % Changing to the home directory
 % cd(current_dir)
 
