@@ -109,7 +109,7 @@ function [fids, dwell_time, npts, tr, xeFreqMHz, rf_excitation_hz, rf_excitation
         fids(size(fids, 1):size(fids, 1) + droppt_N, :) = 0;
     end
     % if data from GE scanner, take complex conjugate
-    if strcmp(scanner, '.h5') && strcmpi(vendor,'ge')
+    if strcmp(scanner, '.mrd') && strcmpi(vendor,'ge')
         fids = conj(fids);
     end
 end
